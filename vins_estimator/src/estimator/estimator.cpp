@@ -95,6 +95,7 @@ void Estimator::clearState()
 void Estimator::setParameter()
 {
     mProcess.lock();
+    featureTracker.fisheye_mask = cv::imread(FISHEYE_MASK, cv::IMREAD_GRAYSCALE);
     for (int i = 0; i < NUM_OF_CAM; i++)
     {
         tic[i] = TIC[i];
@@ -613,12 +614,14 @@ bool Estimator::initialStructure()
     Vector3d T[frame_count + 1];
     map<int, Vector3d> sfm_tracked_points;
     vector<SFMFeature> sfm_f;
+    //遍历所有feature生成临时feature然后加入sfm_f中
     for (auto &it_per_id : f_manager.feature)
     {
         int imu_j = it_per_id.start_frame - 1;
         SFMFeature tmp_feature;
         tmp_feature.state = false;
         tmp_feature.id = it_per_id.feature_id;
+        // 添加观测
         for (auto &it_per_frame : it_per_id.feature_per_frame)
         {
             imu_j++;
@@ -629,7 +632,7 @@ bool Estimator::initialStructure()
     } 
     Matrix3d relative_R;
     Vector3d relative_T;
-    int l;
+    int l; // l 是参考帧在win中的编号
     if (!relativePose(relative_R, relative_T, l))
     {
         ROS_INFO("Not enough features or parallax; Move device around");
@@ -641,6 +644,7 @@ bool Estimator::initialStructure()
               sfm_f, sfm_tracked_points))
     {
         ROS_DEBUG("global SFM failed!");
+        
         marginalization_flag = MARGIN_OLD;
         return false;
     }
@@ -790,6 +794,7 @@ bool Estimator::relativePose(Matrix3d &relative_R, Vector3d &relative_T, int &l)
     for (int i = 0; i < WINDOW_SIZE; i++)
     {
         vector<pair<Vector3d, Vector3d>> corres;
+        //获得归一化平面坐标的对应关系
         corres = f_manager.getCorresponding(i, WINDOW_SIZE);
         if (corres.size() > 20)
         {
@@ -809,7 +814,12 @@ bool Estimator::relativePose(Matrix3d &relative_R, Vector3d &relative_T, int &l)
                 l = i;
                 ROS_DEBUG("average_parallax %f choose l %d and newest frame to triangulate the whole structure", average_parallax * 460, l);
                 return true;
+            }else{
+                if(average_parallax * 460 <= 30) ROS_INFO("average_parallax * 460 <= 30");
+                else    ROS_INFO("m_estimator.solveRelativeRT(corres, relative_R, relative_T) false");
+                
             }
+            
         }
     }
     return false;

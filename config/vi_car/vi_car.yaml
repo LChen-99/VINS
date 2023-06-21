@@ -3,73 +3,73 @@
 #common parameters
 #support: 1 imu 1 cam; 1 imu 2 cam: 2 cam; 
 imu: 1         
-num_of_cam: 2  
+num_of_cam: 1 
 
-imu_topic: "/imu0"
-image0_topic: "/cam0/image_raw"
-image1_topic: "/cam1/image_raw"
-output_path: "/home/tong/output/"
+imu_topic: "/imu"
+image0_topic: "/camera/image_raw"
+output_path: "/home/lc/haomo/output/"
 
-cam0_calib: "cam0_mei.yaml"
-cam1_calib: "cam1_mei.yaml"
-image_width: 752
+cam0_calib: "cam.yaml"
+image_width: 640
 image_height: 480
    
 
 # Extrinsic parameter between IMU and Camera.
-estimate_extrinsic: 0   # 0  Have an accurate extrinsic parameters. We will trust the following imu^R_cam, imu^T_cam, don't change it.
+estimate_extrinsic: 1   # 0  Have an accurate extrinsic parameters. We will trust the following imu^R_cam, imu^T_cam, don't change it.
                         # 1  Have an initial guess about extrinsic parameters. We will optimize around your initial guess.
 
 body_T_cam0: !!opencv-matrix
    rows: 4
    cols: 4
    dt: d
-   data: [ 9.9991036582958637e-01, 1.1948793070511360e-02,
-       -6.0404180899061577e-03, 3.8836925129605959e-02,
-       -1.1931508793228868e-02, 9.9992464233075007e-01,
-       2.8894216789357523e-03, -4.7406823518464092e-03,
-       6.0744879998126597e-03, -2.8170913864660921e-03,
-       9.9997758204454790e-01, -3.5997702822723361e-03, 0., 0., 0., 1. ]
-
-body_T_cam1: !!opencv-matrix
-   rows: 4
-   cols: 4
-   dt: d
-   data: [ 9.9993524996167893e-01, 1.0794248206017055e-02,
-       3.6027891614088276e-03, -7.1831109637002136e-02,
-       -1.0796833045707175e-02, 9.9994146833980613e-01,
-       6.9877794450892857e-04, 2.1952350924807923e-04,
-       -3.5950355016039623e-03, -7.3763141168485817e-04,
-       9.9999326578714653e-01, -7.1952800314573134e-03, 0., 0., 0., 1. ]
+   data: [ -1.0305721724262784e-01, -3.4814791997765820e-01,9.3175760570517285e-01, 1.8686382316574244e+00,
+       9.9466403653720215e-01, -3.1587357569014429e-02,9.8212490352942827e-02, -5.8003459794497773e-02,
+       -4.7607135731448924e-03, 9.3690728711918858e-01,3.4954552056811861e-01, 1.5014204032479803e+00, 
+       0., 0., 0., 1. ]
+   
+#    [ 4.6229078472165397e-02, -2.9963145220494175e-01,
+#        9.5293434461833315e-01, 6.0670305890562126e-01,
+#        9.9866355701406628e-01, -8.2046132213799972e-03,
+#        -5.1027288913878421e-02, 4.1132608618281863e-01,
+#        2.3107838402309289e-02, 9.5401974674083412e-01,
+#        2.9885172014383232e-01, 1.3490448197185483e+00, 0., 0., 0., 1. ]
+       
+    #    [ -1.0305721724262784e-01, -3.4814791997765820e-01,9.3175760570517285e-01, 1.8686382316574244e+00,
+    #    9.9466403653720215e-01, -3.1587357569014429e-02,9.8212490352942827e-02, -5.8003459794497773e-02,
+    #    -4.7607135731448924e-03, 9.3690728711918858e-01,3.4954552056811861e-01, 1.5014204032479803e+00, 
+    #    0., 0., 0., 1. ]
 
 #Multiple thread support
 multiple_thread: 1
 
 #feature traker paprameters
-max_cnt: 150            # max feature number in feature tracking
-min_dist: 30            # min distance between two features 
+max_cnt: 250           # max feature number in feature tracking
+min_dist: 15            # min distance between two features 
 freq: 10                # frequence (Hz) of publish tracking result. At least 10Hz for good estimation. If set 0, the frequence will be same as raw image 
 F_threshold: 1.0        # ransac threshold (pixel)
 show_track: 1           # publish tracking image as topic
 flow_back: 1            # perform forward and backward optical flow to improve feature tracking accuracy
 
 #optimization parameters
-max_solver_time: 0.04  # max solver itration time (ms), to guarantee real time
-max_num_iterations: 8   # max solver itrations, to guarantee real time
-keyframe_parallax: 10.0 # keyframe selection threshold (pixel)
+max_solver_time: 0.2  # max solver itration time (ms), to guarantee real time
+max_num_iterations: 12   # max solver itrations, to guarantee real time
+keyframe_parallax: 5.0 # keyframe selection threshold (pixel)
 
 #imu parameters       The more accurate parameters you provide, the better performance
-acc_n: 0.1          # accelerometer measurement noise standard deviation. #0.2   0.04
-gyr_n: 0.01         # gyroscope measurement noise standard deviation.     #0.05  0.004
-acc_w: 0.001         # accelerometer bias random work noise standard deviation.  #0.02
-gyr_w: 0.0001       # gyroscope bias random work noise standard deviation.     #4.0e-5
-g_norm: 9.8         # gravity magnitude
+acc_n: 0.08        # accelerometer measurement noise standard deviation. #0.2   0.04
+gyr_n: 0.005        # gyroscope measurement noise standard deviation.     #0.05  0.004
+acc_w: 0.0025         # accelerometer bias random work noise standard deviation.  #0.02
+gyr_w: 0.00005     # gyroscope bias random work noise standard deviation.     #4.0e-5
+g_norm: 9.805         # gravity magnitude
 
 #unsynchronization parameters
-estimate_td: 0                      # online estimate time offset between camera and imu
-td: 0.0                             # initial value of time offset. unit: s. readed image clock + td = real image clock (IMU clock)
+estimate_td: 1                      # online estimate time offset between camera and imu
+td: 0.02                             # initial value of time offset. unit: s. readed image clock + td = real image clock (IMU clock)
 
 #loop closure parameters
 load_previous_pose_graph: 0        # load and reuse previous pose graph; load from 'pose_graph_save_path'
 pose_graph_save_path: "/home/tony-ws1/output/pose_graph/" # save and load path
-save_image: 1                   # save image in pose graph for visualization prupose; you can close this function by setting 0 
+save_image: 0                   # save image in pose graph for visualization prupose; you can close this function by setting 0 
+
+
+fisheye_mask_path: "/home/lc/haomo/VINS_WS/src/VINS-Fusion/config/mask.jpg"

@@ -47,6 +47,7 @@ void img1_callback(const sensor_msgs::ImageConstPtr &img_msg)
 
 cv::Mat getImageFromMsg(const sensor_msgs::ImageConstPtr &img_msg)
 {
+    // static int index = 0;
     cv_bridge::CvImageConstPtr ptr;
     if (img_msg->encoding == "8UC1")
     {
@@ -54,6 +55,7 @@ cv::Mat getImageFromMsg(const sensor_msgs::ImageConstPtr &img_msg)
         img.header = img_msg->header;
         img.height = img_msg->height;
         img.width = img_msg->width;
+        // ROS_INFO("img.height = %d, img.width = %d",img.height, img.width);
         img.is_bigendian = img_msg->is_bigendian;
         img.step = img_msg->step;
         img.data = img_msg->data;
@@ -62,8 +64,10 @@ cv::Mat getImageFromMsg(const sensor_msgs::ImageConstPtr &img_msg)
     }
     else
         ptr = cv_bridge::toCvCopy(img_msg, sensor_msgs::image_encodings::MONO8);
-
+    
     cv::Mat img = ptr->image.clone();
+    // ROS_INFO("img.height = %d, img.width = %d",img.rows, img.cols);
+    // cv::imwrite()
     return img;
 }
 
@@ -225,8 +229,8 @@ int main(int argc, char **argv)
 {
     ros::init(argc, argv, "vins_estimator");
     ros::NodeHandle n("~");
-    ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Info);
-
+    // ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Info);
+    ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Debug);
     if(argc != 2)
     {
         printf("please intput: rosrun vins vins_node [config file] \n"

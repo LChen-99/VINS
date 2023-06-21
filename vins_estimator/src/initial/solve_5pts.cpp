@@ -210,14 +210,21 @@ bool MotionEstimator::solveRelativeRT(const vector<pair<Vector3d, Vector3d>> &co
         {
             ll.push_back(cv::Point2f(corres[i].first(0), corres[i].first(1)));
             rr.push_back(cv::Point2f(corres[i].second(0), corres[i].second(1)));
+            // ROS_INFO("ll[i].x = %lf, ll[i].y = %lf", ll[i].x, ll[i].y);
+            // ROS_INFO("rr[i].x = %lf, rr[i].y = %lf", rr[i].x, rr[i].y);
         }
+
         cv::Mat mask;
-        cv::Mat E = cv::findFundamentalMat(ll, rr, cv::FM_RANSAC, 0.3 / 460, 0.99, mask);
+        // cv::Mat E = cv::findFundamentalMat(ll, rr, cv::FM_RANSAC, 0.3 / 460, 0.99, mask);
+        cv::Mat E = cv::findFundamentalMat(ll, rr, cv::FM_RANSAC, 1.0 / 460.0, 0.99, mask);
         cv::Mat cameraMatrix = (cv::Mat_<double>(3, 3) << 1, 0, 0, 0, 1, 0, 0, 0, 1);
         cv::Mat rot, trans;
         int inlier_cnt = cv::recoverPose(E, ll, rr, cameraMatrix, rot, trans, mask);
         //cout << "inlier_cnt " << inlier_cnt << endl;
-
+        // cout << "inlier_cnt " << inlier_cnt << endl;
+        
+        ROS_INFO("corres.size() = %d", corres.size());
+        ROS_INFO("inlier_cnt = %d", inlier_cnt);
         Eigen::Matrix3d R;
         Eigen::Vector3d T;
         for (int i = 0; i < 3; i++)
@@ -229,10 +236,14 @@ bool MotionEstimator::solveRelativeRT(const vector<pair<Vector3d, Vector3d>> &co
 
         Rotation = R.transpose();
         Translation = -R.transpose() * T;
-        if(inlier_cnt > 12)
+        if(inlier_cnt > 10)
             return true;
-        else
+        else{
+            ROS_INFO("solveRelativeRT false");
+            
             return false;
+        }
+            
     }
     return false;
 }

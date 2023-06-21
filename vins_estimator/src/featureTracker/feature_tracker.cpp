@@ -54,8 +54,8 @@ FeatureTracker::FeatureTracker()
 
 void FeatureTracker::setMask()
 {
-    mask = cv::Mat(row, col, CV_8UC1, cv::Scalar(255));
-
+    // mask = cv::Mat(row, col, CV_8UC1, cv::Scalar(255));
+    fisheye_mask.copyTo(mask);
     // prefer to keep features that are tracked for long time
     vector<pair<int, pair<cv::Point2f, int>>> cnt_pts_id;
 
@@ -81,6 +81,8 @@ void FeatureTracker::setMask()
             cv::circle(mask, it.second.first, MIN_DIST, 0, -1);
         }
     }
+    // cv::imshow("1", mask);
+    // cv::waitKey(0);
 }
 
 double FeatureTracker::distance(cv::Point2f &pt1, cv::Point2f &pt2)
@@ -265,6 +267,11 @@ map<int, vector<pair<int, Eigen::Matrix<double, 7, 1>>>> FeatureTracker::trackIm
         x = cur_un_pts[i].x;
         y = cur_un_pts[i].y;
         z = 1;
+        
+        if(abs(x) >= 4 || abs(y) >= 4){
+            continue;
+        }
+        // ROS_INFO("cur_un_pts.x = %lf, cur_un_pts.y = %lf", x, y);
         double p_u, p_v;
         p_u = cur_pts[i].x;
         p_v = cur_pts[i].y;
